@@ -16,7 +16,8 @@ A simple Web interface is also supplied which is implemented using FastAPI that 
 
 ## Tested platforms
 * Windows 10 + Python 3.10.7 (higher versions should work too)
-* Should work on Mac and Linux. Will update when tested.
+* Mac + Python 3.11.3 (will probably work from 3.10.7 too)
+* Should work on Linux. Will update when tested.
 
 ## Installing
 * ```git clone https://github.com/amnond/local_llms.git```
