@@ -17,21 +17,16 @@ app.state.summarizer = Summarizer()
 # Serve static files (HTML page)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-def process_word(word):
-    # Simulate a long synchronous process
-    time.sleep(1)  # Simulate 1 second of processing time
-    return word.upper()  # Simply convert the word to uppercase
-
-def get_next_word(stream):
-    next_word = None
+def get_next_token(stream):
+    next_token = None
     try:
-        next_word = next(stream)
+        next_token = next(stream)
     except StopIteration:
         pass
     
-    print(f'next_word: {next_word}')
+    print(f'next_token: {next_token}')
     
-    return next_word
+    return next_token
 
 def translate_line_to_en(line):
     translated = app.state.linetranslator.line_to_english(line)
@@ -40,9 +35,16 @@ def translate_line_to_en(line):
 def translate_line_to_he(line):
     translated = app.state.linetranslator.line_to_hebrew(line)
     return translated
+
+def send_SSE(text, tag='text'):
+    data = {
+        tag:text
+    }
+    jsons = json.dumps(data)
+    return f"data: {jsons}\n\n"
     
-@app.post("/echo")
-async def echo(request: Request):
+@app.post("/summarize")
+async def summarize(request: Request):
     # Get the JSON payload
     data = await request.json()
     text = data.get("text", "")
@@ -53,18 +55,16 @@ async def echo(request: Request):
         'top_p' : data.get("top_p", 0.95)
     }
     
+    print('summary_params')
+    print(summary_params)
+    
     words = text.split()
 
     async def generate():
+        patience = "Initialization can take a minute. Your patience is appreciated.<br>"
         loop = asyncio.get_running_loop()
         with ThreadPoolExecutor() as pool:
-            '''
-            for word in words:
-                # Process each word in a separate thread
-                processed_word = await loop.run_in_executor(pool, process_word, word)
-                yield f"data: {json.dumps({'word': processed_word})}\n\n"
-            '''
-            yield f"data: {json.dumps({'word': '<br /><h4>Translating to English</h4>'})}\n\n"
+            yield send_SSE(f'<br /><h4>Translating to English</h4>{patience}')
             
             lines_to_translate =  text.split('\n')
             total = len(lines_to_translate)
@@ -74,44 +74,40 @@ async def echo(request: Request):
                 translated_text = await loop.run_in_executor(pool, translate_line_to_en, line)
                 text_to_summarize += translated_text
                 progress = (linenum+1) / total
-                yield f"data: {json.dumps({'word': translated_text+f'({progress:.2%}) <br><br>'})}\n\n"
+                yield send_SSE( translated_text+f'({progress:.2%}) <br><br>')
                 
-            yield f"data: {json.dumps({'word': '<br /><hr />'})}\n\n"
+            yield send_SSE('<br /><hr />')
             
             print(f'\nCreating summarizer stream for text {text_to_summarize}\n')
             
-            
-            yield f"data: {json.dumps({'word': '<br /><h4>Summarizing in English</h4>'})}\n\n"
+            yield send_SSE(f'<br /><h4>Summarizing in English</h4>{patience}')
             
             stream = app.state.summarizer.get_summarizer_stream(text_to_summarize, summary_params)
             summarized_text = ''
             while True:
-                next_summarized_word = await loop.run_in_executor(pool, get_next_word, stream)
-                if next_summarized_word == None:
+                next_summarized_token = await loop.run_in_executor(pool, get_next_token, stream)
+                if next_summarized_token == None:
                     break
                     
-                summarized_text += next_summarized_word
-                if next_summarized_word == '\n':
-                    next_summarized_word = '<br />';
-                yield f"data: {json.dumps({'word': next_summarized_word})}\n\n"                
+                summarized_text += next_summarized_token
+                if next_summarized_token == '\n':
+                    next_summarized_token = '<br />';
+                yield send_SSE(next_summarized_token)                
 
-            yield f"data: {json.dumps({'word': '<br /><hr />'})}\n\n"
+            yield send_SSE('<br /><hr />')
             print(summarized_text)
             
-            yield f"data: {json.dumps({'word': '<br /><h4>Translating summary to Hebrew</h4>'})}\n\n"
-            hebdiv = "<div dir='rtl'>"
-            yield f"data: {json.dumps({'word': f'<br />{hebdiv}'})}\n\n"
-
+            yield send_SSE('<br /><h4>Translating summary to Hebrew</h4>', tag='result')
+            
             lines_to_translate =  summarized_text.split('\n')
             total = len(lines_to_translate)
             for linenum in range(total):
                 line = lines_to_translate[linenum]
                 translated_text = await loop.run_in_executor(pool, translate_line_to_he, line)
                 progress = (linenum+1) / total
-                yield f"data: {json.dumps({'word': translated_text+f'({progress:.2%}) <br><br>'})}\n\n"
-                
-            yield f"data: {json.dumps({'word': '<br /></div>'})}\n\n"                
-            yield f"data: {json.dumps({'word': '<br /><hr />'})}\n\n"
+                yield send_SSE(translated_text+f'({progress:.2%}) <br><br>', tag='result')
+
+            
 
     return StreamingResponse(generate(), media_type="text/event-stream")
 

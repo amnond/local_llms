@@ -36,20 +36,22 @@ class Summarizer:
         return prompt
    
         
-    def get_summarizer_stream(self, text, summary_params=None):
+    def get_summarizer_stream(self, text, params=None):
         max_tokens = 256
         temperature = 0.7
         top_k = 10
         top_p = 0.95
         
-        if summary_params:
-            if 'temperature' in summary_params:
-                temperature = summary_params['temperature']
-            if 'top_k' in summary_params:
-                top_k = summary_params['top_k']
-            if 'top_p' in summary_params:
-                temperature = summary_params['top_p']
+        if params:
+            if 'temperature' in params:
+                temperature = params['temperature']
+            if 'top_k' in params:
+                top_k = params['top_k']
+            if 'top_p' in params:
+                top_p = params['top_p']
     
+        print(f'llama_cpp: temperature:{temperature}, top_k:{top_k}, top_p:{top_p}')
+        
         prompt = self.generate_summary_prompt(text)
 
         response_stream = self.llm(
