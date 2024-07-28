@@ -17,6 +17,7 @@ app.state.summarizer = Summarizer()
 # Serve static files (HTML page)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# A thread function to get the next token from the stream
 def get_next_token(stream):
     next_token = None
     try:
@@ -28,14 +29,19 @@ def get_next_token(stream):
     
     return next_token
 
+# A thread function to translate a chunk of text to English
 def translate_line_to_en(line):
     translated = app.state.linetranslator.line_to_english(line)
     return translated
 
+# A thread function to translate a chunk of text to Hebrew
 def translate_line_to_he(line):
     translated = app.state.linetranslator.line_to_hebrew(line)
     return translated
 
+# A function to build the string to send via Server Side Events
+# TODO (Amnon) For a more direct way to stream JSON, see:
+# https://www.vidavolta.io/streaming-with-fastapi/
 def send_SSE(text, tag='text'):
     data = {
         tag:text
@@ -64,13 +70,17 @@ async def summarize(request: Request):
         patience = "Initialization can take a minute. Your patience is appreciated.<br>"
         loop = asyncio.get_running_loop()
         with ThreadPoolExecutor() as pool:
-            yield send_SSE(f'<br /><h4>Translating to English</h4>{patience}')
-            
+            yield send_SSE(f'<h4>Translating to English</h4>{patience}<br>')
+
+            # Translate the text line by line to English, sending each line to a processing thread
+            # translate_line_to_en while resuming the event loop until the line is processed.
             lines_to_translate =  text.split('\n')
             total = len(lines_to_translate)
             text_to_summarize = ''
             for linenum in range(total):
                 line = lines_to_translate[linenum]
+                # send for processing in different thread, resume event loop and continue
+                # to next line after thread completes
                 translated_text = await loop.run_in_executor(pool, translate_line_to_en, line)
                 text_to_summarize += translated_text
                 progress = (linenum+1) / total
@@ -80,8 +90,10 @@ async def summarize(request: Request):
             
             print(f'\nCreating summarizer stream for text {text_to_summarize}\n')
             
-            yield send_SSE(f'<br /><h4>Summarizing in English</h4>{patience}')
+            yield send_SSE(f'<h4>Summarizing in English</h4>{patience}><br>')
             
+            # Summarize the English text token by token, via the processing thread
+            # get_next_token while resuming the event loop until we get the next token
             stream = app.state.summarizer.get_summarizer_stream(text_to_summarize, summary_params)
             summarized_text = ''
             while True:
@@ -97,10 +109,12 @@ async def summarize(request: Request):
             yield send_SSE('<br /><hr />')
             print(summarized_text)
             
-            yield send_SSE('<br /><h4>Translating summary to Hebrew</h4>', tag='result')
+            yield send_SSE('<h4>תרגום הסיכום לעברית</h4>', tag='result')
             
+            # Translate the summarized English text line by line to Hebrew, sending each line to a processing thread
+            # translate_line_to_he while resuming the event loop until the line is processed.
             lines_to_translate =  summarized_text.split('\n')
-            total = len(lines_to_translate)
+            total = len(lines_to_translate)            
             for linenum in range(total):
                 line = lines_to_translate[linenum]
                 translated_text = await loop.run_in_executor(pool, translate_line_to_he, line)

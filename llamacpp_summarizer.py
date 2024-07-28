@@ -16,10 +16,13 @@ class Summarizer:
             device='cuda'
         )
 
+    # an internal method to create a prompt to summarize text
     def generate_summary_prompt(self, text):
-        user_msg = f'''Generate no more than 5 bullet points for the following text. The text is:
+        user_msg = f'''Generate at most 5 bullet points that summarize following text. 
+        It is critical that you only generate bullet points.
+        The text is:
         {text}.
-        Do not generate any text in addition to the bullet points.'''
+        '''
         
         messages = [
             {"role": "system", "content": "You are an expert at summarizing text to important bullet points."},
@@ -35,7 +38,7 @@ class Summarizer:
         
         return prompt
    
-        
+    # A method to get an iterator that will summarize the given text    
     def get_summarizer_stream(self, text, params=None):
         max_tokens = 256
         temperature = 0.7
@@ -64,6 +67,7 @@ class Summarizer:
             #stop=["## Your task:", "Note:", "[support]:"]
         )
         
+        # Define an iterator that will return the next token
         class MyIterator:
             def __init__(self, stream):
                 self.stream = stream
