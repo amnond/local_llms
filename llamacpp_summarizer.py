@@ -1,7 +1,10 @@
 from llama_cpp import Llama
 
 # https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/blob/main/Phi-3-mini-4k-instruct-q4.gguf
+import random
 
+# Set a specific random seed (e.g., 42)
+random.seed(42)
 
 class Summarizer:
     def __init__(self):
@@ -33,7 +36,20 @@ class Summarizer:
         return prompt
    
         
-    def get_summarizer_stream(self, text, max_tokens=256, temperature=0.7, top_k=10, top_p=0.95):
+    def get_summarizer_stream(self, text, summary_params=None):
+        max_tokens = 256
+        temperature = 0.7
+        top_k = 10
+        top_p = 0.95
+        
+        if summary_params:
+            if 'temperature' in summary_params:
+                temperature = summary_params['temperature']
+            if 'top_k' in summary_params:
+                top_k = summary_params['top_k']
+            if 'top_p' in summary_params:
+                temperature = summary_params['top_p']
+    
         prompt = self.generate_summary_prompt(text)
 
         response_stream = self.llm(
@@ -81,14 +97,6 @@ if __name__ == '__main__':
     In an interview with CNN, Hoffman added: "In Silicon Valley, actually there’s many threads that are very excited about her. …She understands how technology can create a great difference for the American people."
     '''
 
-    text = '''
-    The world is full of bright and beautiful colors, from the metallic brass of the serpent to the color of the serpent, from the yellow colors of the serpent to the red ones of the serpent. In many cases, evolutionary biologists can explain why these colors are used to attract females. The colors of the serpent are designed to attract females; the colors of the serpent are designed to warn those who may want to eat it because it has dangerous prey; the colors of the serpent help them to help other prey; the prominent example of the serpent warns of prey animals; the color of the serpent is used to help other prey; the colors of the serpent are used to warn the prey of other prey; the colors of the serpent are used to warn the prey of the danger of other prey; the colors of the serpent are used to protect the prey from the danger of other prey.
-    There are also other functions that these colors can fulfill, such as for example distinguishing between different species. This ensures that the species you choose actually belongs to the same species as you, and not to the same species but different. However, in some cases we simply have no idea what colors are used for. One example of this can be found in traditional films, especially in those that live in deep varieties on the river's edges. These films almost never come out of their differences, and in the rare cases that they come out, they do so at night.
-    Why did they evolve amongst those colours that nobody else is allowed to see? In a new article, researchers from the United States suggest that they may have appeared by chance.
-    Evolutionary biologists tend to speak in terms of the death: the burden of the shoulders is the death of the human ear, while the great ears of the shoulders are the death of the human ear, as they help the human ear to live in the desert. The earliest rules of the dolphin have taken the form of the snfירים as a life in the water, while the long rules of the antelope are the death of the open ones, in which it must escape quickly.
-    When thinking of such concepts, it is easy to fall into the trap of seeing all the features of every living thing, as a means to something. But evolution is not an engineering skill that perfectly designs its creations; evolution does not know how to plan, only to respond to the conditions of the environment. Natural selection causes that qualities that help create life to survive and teach the needs of future generations and spread in the population. It cannot predict the future, and it does not design all the elements and their biological structure in an optimal way.
-    In the new study, the researchers tried to avoid exactly this conclusion: they did not go out to find out what the role of the color of the films was, but first of all, they tried to find out if they had such a role. To do so, they were forced to evolve into four hundred of the seven hundred known species of film. They examined the colors of the different films.
-    '''
     summarizer = Summarizer()
     stream = summarizer.get_summarizer_stream(text)
     

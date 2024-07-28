@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סיכום טקסט בעברית</title>
+    <style>
+    .inpw {
+        width: 50px;
+    }
+    </style>
+</head>
+<body>
+    <div dir='rtl'>
+    <h1>סיכום טקסט בעברית</h1>
+    מלאו טקסט בעברית לסיכום
+    <textarea style='width:100%;' id="inputText" rows="10">
+עולם החי מלא בצבעים בוהקים ויפהפיים, מהברק המתכתי של כנפי הצופית ועד לכתום של דגי השושנון, מהפסים הצהובים של הדבורה לאלו האדומים של נחש הפתן האלמוגי. במקרים רבים, ביולוגים אבולוציוניים יכולים להסביר למה משמשים אותם צבעים חזקים. הצבעים של זכרי הצופית נועדו למשוך את הנקבות; הפסים של הדבורה נועדו להזהיר את מי שאולי ירצה לאכול אותה שיש לה עוקץ מסוכן; הצבעים של דגי גמבוזיה עוזרים להם לחזר אחר נקבות; הדוגמה הבולטת של הפתן האלמוגי מזהירה טורפים שהוא ארסי; הזנב הצבעוני של הטווס משמש לחיזור אחר נקבות; הצבעים הבוהקים של צפרדע חץ הרעל משדרים לטורפים שהיא רעילה... טוב, נכון, רוב הסיבות לצבעים חזקים הן או חיזור אחר נקבות, או סימון שמזהיר טורפים מפני סכנה. 
+יש גם תפקידים אחרים שצבעים כאלו יכולים למלא, כמו למשל להבדיל בין מינים שונים – כך אפשר להבטיח שבן הזוג שבחרת אכן שייך לאותו מין כמוך, ולא למין קרוב אך שונה. עם זאת, במקרים מסוימים פשוט אין לנו מושג למה משמשים הצבעים. דוגמה אחת לכך אפשר למצוא אצל סרטני נהרות, במיוחד במינים שחיים במחילות עמוקות על גדות הנהר. סרטנים אלו כמעט ולא יוצאים מהמחילות שלהם, וגם במקרים הנדירים שהם מגיחים החוצה, הם עושים זאת בלילה. למרות זאת, לא מעט מהמינים שלהם מתהדרים בשריון בצבע אדום חזק, כתום או אפילו כחול. 
+מדוע התפתחו אצלם צבעים בוהקים כאלו, שכמעט אף אחד לא זוכה לראות? במאמר חדש, חוקרים מארצות הברית מעלים אפשרות שנשמעת פרובוקטיבית למדי בחוגי הביולוגיה האבולוציונית: ייתכן שהם הופיעו לגמרי במקרה. 
+ביולוגים אבולוציוניים נוטים לדבר במונחים של התאמות: הפרווה העבה של שועלי השלג היא התאמה לקור הצפוני, בעוד האוזניים הגדולות של שועל הפנק הן התאמה לחיים במדבר, שכן הן עוזרות לו לקרר את עצמו; רגליו הקדמיות של הדולפין קיבלו צורה של סנפירים כהתאמה לחיים במים, ואילו רגליה הארוכות של האנטילופה הן התאמה לחיים בערבות פתוחות, שבהן היא צריכה להימלט במהירות מטורפים. 
+כשחושבים במושגים כאלו, קל ליפול למלכודת של ראיית כל תכונה של כל יצור חי, כהתאמה למשהו. אבל האבולוציה היא לא מהנדס גאון שמתכנן באופן מושלם את יצירותיו; האבולוציה לא יודעת לתכנן כלל, רק להגיב לתנאי הסביבה. הברירה הטבעית גורמת לכך שתכונות שעוזרות ליצור החי לשרוד ולהעמיד צאצאים יעברו לדורות הבאים ויתפשטו באוכלוסייה. היא אינה יכולה לצפות את העתיד, והיא לא מעצבת כל איבר ומבנה ביולוגי בצורה אופטימלית. לכן, לא לכל תכונה יש הסבר אבולוציוני: לעיתים איבר כלשהו שינה את צורתו כ"תופעת לוואי" של שינוי אחר, ולעיתים יש תכונות שהתפתחו במקרה, בעקבות מוטציות אקראיות.
+    </textarea><br><br>
+    <div dir='ltr'>
+    Temperature <input type='text' class='inpw' id='id_temperature' value='0.7'>
+    Top k <input type='text' class='inpw' id='id_top_k' value='10'>
+    Top p <input type='text' class='inpw' id='id_top_p' value='0.95'>
+    </div>
+    <br>
+    <button onclick="sendText()">שלחו טקסט לסיכום</button>
+    <br><br>
+    </div>
+    <div id="output" style='width:100%; height:400px; border: 1px solid black; overflow-x:none; overflow-y:auto;'></div>
+
+    <script>
+        function sendText() {
+            var text = document.getElementById('inputText').value;
+            const output = document.getElementById('output');
+            var temperature = parseFloat(document.getElementById('id_temperature').value);
+            var top_k = parseInt(document.getElementById('id_top_k').value);
+            var top_p = parseFloat(document.getElementById('id_top_p').value);
+            
+            output.innerHTML = '';
+
+            fetch('/echo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    top_p: top_p,
+                    top_k: top_k,
+                    temperature: temperature                    
+                }),
+            }).then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                function read() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            return;
+                        }
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n\n');
+                        console.log(lines);
+                        lines.forEach(line => {
+                            if (line.startsWith('data: ')) {
+                                const data = JSON.parse(line.slice(6)); // to remove 'data: '
+                                output.innerHTML += data.word;
+                                // Scroll to the bottom of the content
+                                output.scrollTop = output.scrollHeight;
+                            }
+                        });
+                        read();
+                    });
+                }
+
+                read();
+            });
+        }
+    </script>
+</body>
+</html>
+
