@@ -22,7 +22,7 @@ A simple Web interface is also supplied which is implemented using FastAPI that 
 ## Installing
 * ```git clone https://github.com/amnond/local_llms.git```
 * ```cd local_llms```
-* ```wget https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf (or simply download it via a Web browser from ```[here](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/blob/main/Phi-3-mini-4k-instruct-q4.gguf)
+* ```wget https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf or simply download it via a Web browser from ```[here](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/blob/main/Phi-3-mini-4k-instruct-q4.gguf) 
 * ```pip install -r requirements.txt```
 
 ## Running:
