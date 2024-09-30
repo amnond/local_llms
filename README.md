@@ -39,7 +39,7 @@ Here are some in no particular order
 * Show a "processing" animation (e.g. next to the process button) until the entire process is complete
 * Improve the prompt that creates the bullet summaries. Even with low temperature the Phi-3-mini-4k-instruct-q4 model gives itself way too much creative freedom
 * Profile and improve the long delay before the first token is generated for the summary. 
-* The translation is quite dismal sometimes. Try other methods to perform the translation,for example LibreTranslate or for the more ambitious, fine tune a good model with Hebrew content
+* The translation is quite dismal sometimes. Try other methods to perform the translation,for example [Dicta-LM 2.0](https://huggingface.co/dicta-il) or [Gemma 11B Instruct](https://huggingface.co/yam-peleg/Hebrew-Gemma-11B-Instruct)
 * Try LLama3.1 or other high ranking models instead of Phi-3-mini-4k-instruct-q4
 * With the rate of development in this field, APIs in newer versions of modules are not always compatible with older ones. Update code to support latest version of all module dependencies
   while trying to support older versions to the extent possible.
